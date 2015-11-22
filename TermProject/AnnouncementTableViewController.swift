@@ -12,16 +12,20 @@ import SwiftyJSON
 
 class AnnouncementTableViewController: UITableViewController{
     
-    @IBOutlet weak var navBar: UINavigationItem!
     @IBOutlet weak var announcementTable: UITableView!
+    
+    //Array of Announcement objects to hold return data from GET request
     var announcements = [Announcement]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         getData()
     }
     
+    //Send GET request and populate announcements array
     func getData(){
+        //Request path
         let path = "https://api.mongolab.com/api/1/databases/comp4977project/collections/Announcement?apiKey=QNwCXLgMzmjtezI0ZIubDsy0QZkKdWAX"
         
         Alamofire.request(.GET, path)
@@ -78,11 +82,13 @@ class AnnouncementTableViewController: UITableViewController{
     
     override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         let cellIdentifier = "AnnouncementCell"
-
+        
+        //Connect to AnnouncementTableViewCell (The custom tableview cell)
         let cell = tableView.dequeueReusableCellWithIdentifier(cellIdentifier, forIndexPath: indexPath) as! AnnouncementTableViewCell
-
+        
         let announcement = self.announcements[indexPath.row]
         
+        //The background colour selector is based on which category the announcement falls into
         switch announcement.Category {
         case "Campus":
             cell.backgroundColor = UIColor(red: 203/255, green: 234/255, blue: 239/255, alpha: 0.4)
@@ -92,6 +98,7 @@ class AnnouncementTableViewController: UITableViewController{
             cell.backgroundColor = UIColor.whiteColor()
         }
         
+        //Setting label text
         cell.dateLabel.text = announcement.Date
         cell.messageLabel.text = announcement.Message
         cell.locationLabel.text = announcement.Location
@@ -100,8 +107,20 @@ class AnnouncementTableViewController: UITableViewController{
         return cell
     }
     
-    override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-    
+    //Allows data from this controller to be passed to AnnouncementDetailViewController
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        if(segue.identifier == "ShowAnnouncementDetails") {
+            
+            //Cast allows this controller to access the "data" property in AnnouncementDetailViewController
+            let announcementViewController = segue.destinationViewController as! AnnouncementDetailViewController
+            
+            let myIndexPath = self.tableView.indexPathForSelectedRow!
+        
+            let row = myIndexPath.row
+            
+            //Assigns the value of the selected row to the data property in AnnouncementDetailViewController
+            announcementViewController.data = self.announcements[row]
+        }
     }
 
 }
